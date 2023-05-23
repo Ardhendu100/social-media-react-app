@@ -2,6 +2,7 @@ import React from 'react';
 import Slider from 'react-slick';
 import ReactPlayer from 'react-player';
 import { useState } from 'react';
+import { FaThumbsUp, FaComment, FaPaperPlane } from 'react-icons/fa';
 
 const VerticalSlider = ({ posts }) => {
   const settings = {
@@ -15,10 +16,38 @@ const VerticalSlider = ({ posts }) => {
   };
 
   const [showFullContent, setShowFullContent] = useState(false);
+  const [isLike, setisLike] = useState([]);
+  const [showCommentField, setShowCommentField] = useState(false);
+  const [commentText, setCommentText] = useState('');
 
+  const handleToggleCommentField = () => {
+    setShowCommentField(!showCommentField);
+  };
+
+  const handleCommentTextChange = (event) => {
+    setCommentText(event.target.value);
+  };
+  const handlePostComment = (comment) => {
+    setCommentText('')
+    console.log(comment)
+
+    // alert(comment)
+    // Handle posting the comment logic here
+    // You can access the comment text using the commentText state variable
+    // and perform the necessary actions (e.g., save to a database, update state, etc.)
+    // You can clear the comment text field by calling setCommentText('') if needed.
+  };
   const handleShowText = () => {
     setShowFullContent(!showFullContent);
   };
+
+  const handleLike = (postId) => {
+    if (isLike.includes(postId)) {
+      setisLike(isLike.filter((id) => id !== postId));
+    } else {
+      setisLike([...isLike, postId]);
+    }
+  }
 
   return (
     // <Slider {...settings}>
@@ -59,7 +88,9 @@ const VerticalSlider = ({ posts }) => {
             </div>
             <div className="mt-2 mb-2">
               <p
-                className={`text-sm ${showFullContent ? 'whitespace-normal' : 'whitespace-nowrap overflow-ellipsis'
+                className={`text-sm ${showFullContent
+                  ? 'whitespace-normal'
+                  : 'whitespace-nowrap overflow-ellipsis'
                   } break-all sm:max-w-lg md:max-w-xl`}
               >
                 {post.content.length > 50 && !showFullContent
@@ -67,7 +98,7 @@ const VerticalSlider = ({ posts }) => {
                   : post.content}
               </p>
             </div>
-            {post.content.length > 50 && (
+            {post.content.length > 50 && window.innerWidth > 768 && (
               <button
                 className="text-blue-500 underline mb-2"
                 onClick={handleShowText}
@@ -82,19 +113,44 @@ const VerticalSlider = ({ posts }) => {
             />
           </div>
           <hr />
-          <div class="grid grid-cols-6 gap-2">
-            <div class="col-start-2 col-span-3">
-              <button className="text-black-500">
-                Like
-              </button>
+          <div className="grid grid-cols-6 gap-2">
+            <div className="col-start-2 col-span-3 flex flex-row items-center">
+              {isLike.includes(post.id) ?
+                <FaThumbsUp color="blue" />
+                :
+                <FaThumbsUp />
+              }
+              <button className="text-black-500 ml-2"
+                onClick={() => handleLike(post.id)}>Like</button>
             </div>
-
-            <div class="">
-            <button className="text-black-500">
-                Comment
-              </button>
+            <div className="flex flex-row items-center">
+              <FaComment />
+              <button className="text-black-500 ml-2" onClick={handleToggleCommentField}>Comment</button>
             </div>
           </div>
+
+          {showCommentField && (
+            <div className="flex flex-row items-center col-span-3 mt-3">
+              <div className="relative flex-grow w-full">
+                <textarea
+                  value={commentText}
+                  onChange={handleCommentTextChange}
+                  className="rounded-lg bg-gray-100 p-2 pl-10 pr-10 focus:outline-none w-full"
+                  rows={3}
+                  placeholder="Type your comment..."
+                />
+                {commentText ?
+                  <FaPaperPlane color="blue"
+                    className="absolute top-1/2 right-2 transform -translate-y-1/2 cursor-pointer text-gray-400"
+                    onClick={() => handlePostComment(commentText)}
+                  />
+                  :
+                  <FaPaperPlane className="absolute top-1/2 right-2 transform -translate-y-1/2 text-gray-400 cursor-not-allowed" />
+                }
+
+              </div>
+            </div>
+          )}
         </div>
       ))}
     </div>
